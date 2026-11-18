@@ -742,6 +742,11 @@ lucide.createIcons({icons});\``);if(typeof c>"u")throw new Error("`createIcons()
 .ek-preview.ek-phone { max-width:390px; margin-inline:auto; }
 .ek-preview .ek-brand { padding:0; font-weight:800; }
 .ek-preview .ek-brand:hover { color:var(--ek-accent); }
+.ek-preview .ek-catalog-search:focus-within { border-color:var(--ek-muted); }
+.ek-preview .ek-catalog-search input:focus { outline:none; }
+@media (forced-colors:active) {
+  .ek-preview .ek-catalog-search:focus-within { border-color:Highlight; }
+}
 .ek-preview .ek-directory-card { position:relative; min-width:0; }
 .ek-preview .ek-directory-region { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ek-muted); }
 .ek-preview .ek-directory-region svg { width:15px; height:15px; color:var(--ek-accent); }

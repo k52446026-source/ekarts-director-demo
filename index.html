@@ -1345,7 +1345,16 @@ lucide.createIcons({icons});\``);if(typeof c>"u")throw new Error("`createIcons()
   .ek-preview .ek-is-feed .ek-layout {gap:12px}
   .ek-preview .ek-is-feed .ek-other-days button small~small {display:none}
   .ek-preview .ek-is-feed>.ek-other-days {margin-top:10px;padding:10px 0 4px}
-  .ek-preview .ek-is-feed .ek-side :is(.ek-aside-block,.ek-guide) {display:none}
+  /* Reuse the desktop guide after the event list. Venue and subscription
+     already have mobile controls, so leave their sidebar copies hidden. */
+  .ek-preview .ek-is-feed .ek-layout>.ek-side {display:block}
+  .ek-preview .ek-is-feed .ek-side :is(.ek-aside-block,.ek-feed-venue) {display:none}
+  .ek-preview .ek-is-feed .ek-guide {padding:0}
+  .ek-preview .ek-is-feed .ek-guide h3 {display:none}
+  .ek-preview .ek-is-feed .ek-guide button {
+    width:100%;min-height:44px;padding:8px 12px;justify-content:space-between;
+    border:1px solid var(--ek-line);border-radius:10px;text-align:left;font-size:13px;
+  }
   .ek-preview .ek-is-feed>.ek-mobile-subscribe {margin-top:10px}
   .ek-preview .ek-feed-address {display:block}
   .ek-preview .ek-feed-address svg {vertical-align:text-bottom;margin-right:5px}
@@ -1600,7 +1609,7 @@ function persist(){protoCacheState();window.openai?.setWidgetState?.({modelConte
 function updateFilterControls(){root.querySelectorAll('[data-choice]').forEach(b=>b.setAttribute('aria-pressed',String(pendingFilters[b.dataset.choice]===b.dataset.value)));}
 function syncInputs(){q('.ek-main input').value=state.query;pendingFilters={level:state.level,price:state.price};updateFilterControls();}
 function resetFilters(){state.query='';state.level='all';state.price='all';syncInputs();}
-function focusKey(el){if(!el||!root.contains(el))return null;for(const name of ['data-feed-event','data-proto-back','data-proto-save','data-proto-event-action','data-proto-event-faq','data-proto-event','data-proto-club-action','data-proto-club','data-club-page','data-about-faq','data-my-remove','data-my-detail','data-my-register','data-my-period','data-my-undo','data-format','data-catalog-start','data-catalog-club','data-save','data-date','data-detail','data-club','data-section','data-view','data-action'])if(el.hasAttribute(name))return [name,el.getAttribute(name)];return null;}
+function focusKey(el){if(!el||!root.contains(el))return null;for(const name of ['data-feed-event','data-proto-back','data-proto-save','data-proto-event-action','data-proto-event-faq','data-club-event-cta','data-proto-event','data-proto-club-action','data-proto-club','data-club-page','data-about-faq','data-my-remove','data-my-detail','data-my-register','data-my-period','data-my-undo','data-format','data-catalog-start','data-catalog-club','data-save','data-date','data-detail','data-club','data-section','data-view','data-action'])if(el.hasAttribute(name))return [name,el.getAttribute(name)];return null;}
 function focusMatch(key){return key&&[...root.querySelectorAll(`[${key[0]}]`)].find(el=>el.getAttribute(key[0])===key[1]&&el.getClientRects().length&&!el.closest('[hidden]'));}
 function restoreFocus(key,previous){if(!key||previous?.isConnected&&previous.getClientRects().length)return;const replacement=focusMatch(key)||[...root.querySelectorAll('[data-save]')].find(el=>el.getClientRects().length)||[...root.querySelectorAll('[data-section]')].find(el=>el.dataset.section===state.section&&el.getClientRects().length);if(replacement){replacement.focus({preventScroll:true});replacement.scrollIntoView({block:'nearest',inline:'nearest'});}}
 // Seven dates from Monday to Sunday. The header, day selection and keyboard
@@ -2371,7 +2380,7 @@ function protoClubEventGroup(list, archived, showGroup) {
         <div><h3><button type="button" class="ek-club-event-name" data-proto-event="${event.id}">${escape(event.name)}</button></h3><p class="ek-club-event-place">${escape(place)}</p></div>
         <button type="button" class="ek-save" data-save="${event.id}" aria-pressed="${saved}" aria-label="${saved ? 'Убрать из моих событий' : 'Сохранить'} — ${escape(event.name)}"><i data-lucide="${saved ? 'bookmark-check' : 'bookmark'}" aria-hidden="true"></i></button>
       </div>
-      <div class="ek-event-bottom"><div class="ek-price">${escape(event.priceText)}<span class="ek-price-note">${archived ? 'стоимость в анонсе' : escape(event.note)}</span></div><button type="button" class="ek-cta ${featured ? '' : 'ek-secondary'}" data-proto-event="${event.id}">${archived ? 'Посмотреть' : 'Подробнее'}<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+      <div class="ek-event-bottom"><div class="ek-price">${escape(event.priceText)}<span class="ek-price-note">${archived ? 'стоимость в анонсе' : escape(event.note)}</span></div><button type="button" class="ek-cta ${featured ? '' : 'ek-secondary'}" data-proto-event="${event.id}" data-club-event-cta="${event.id}">${archived ? 'Посмотреть' : 'Подробнее'}<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
       <div class="ek-status">${archived ? 'Событие завершено · запись закрыта' : event.open ? '<em>● Запись открыта</em> · у организатора' : 'Условия регистрации уточняются'}</div>
     </article>`;
   }).join('');
@@ -2432,8 +2441,7 @@ function protoRenderClub(name) {
   const escape = protoClubEscape;
   const active = page.contains(document.activeElement) ? document.activeElement : null;
   const sameClub = page.dataset.protoClub === club.name;
-  const savedId = sameClub && active?.getAttribute('data-save');
-  const eventId = sameClub && active?.getAttribute('data-proto-event');
+  const origin = sameClub && active?.closest('.ek-club-events') ? focusKey(active) : null;
   const matches = events.filter(event => protoClubInfo(event.place)?.slug === club.slug)
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const upcoming = matches.filter(event => !myIsPast(event));
@@ -2482,8 +2490,7 @@ function protoRenderClub(name) {
     ? protoClubEventGroup(upcoming, false, mixed) + protoClubEventGroup(past, true, mixed)
     : `<div class="ek-directory-empty"><p>В демонстрационном расписании пока нет событий этого клуба.</p>${protoClubLink(club.url, 'Проверить расписание на ekarts.ru', 'ek-club-source-link')}</div>`;
   page.querySelectorAll('button,summary,a').forEach(element => element.classList.add('cursor-interaction'));
-  if (savedId) page.querySelector(`[data-save="${savedId}"]`)?.focus({ preventScroll: true });
-  else if (eventId) page.querySelector(`[data-proto-event="${eventId}"]`)?.focus({ preventScroll: true });
+  if (origin) focusMatch(origin)?.focus({ preventScroll: true });
   return { name: club.name, slug: club.slug, eventIds: [...upcoming, ...past].map(event => event.id),
     upcomingIds: upcoming.map(event => event.id), pastIds: past.map(event => event.id) };
 }

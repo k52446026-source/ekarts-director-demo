@@ -1237,7 +1237,11 @@ lucide.createIcons({icons});\``);if(typeof c>"u")throw new Error("`createIcons()
 .ek-preview .ek-searchbar {align-items:stretch;gap:8px;margin-bottom:16px}
 .ek-preview .ek-search-wrap {display:flex;flex:1;min-width:0;align-items:center;position:relative}
 .ek-preview .ek-search-wrap .ek-search {align-self:stretch;margin:0;min-height:46px}
-.ek-preview .ek-search-wrap:focus-within .ek-search {border-color:var(--ek-accent)}
+.ek-preview .ek-search-wrap:focus-within .ek-search {border-color:var(--ek-muted)}
+.ek-preview .ek-search input:focus {outline:none}
+@media (forced-colors:active) {
+  .ek-preview .ek-search-wrap:focus-within .ek-search {border-color:Highlight}
+}
 .ek-preview .ek-search-wrap input::-webkit-search-cancel-button {display:none}
 .ek-preview .ek-search-wrap:has([data-clear-search]:not([hidden])) .ek-search {padding-inline-end:44px}
 .ek-preview .ek-search-wrap [data-clear-search] {position:absolute;inset-inline-end:1px;inset-block:1px;align-self:center;min-width:44px;min-height:44px;border-radius:9px;color:var(--ek-muted);font:500 21px/1 Arial,sans-serif}
